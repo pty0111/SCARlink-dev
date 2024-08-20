@@ -146,7 +146,8 @@ write_files <- function(archr_out, seurat_out, out_dir, window_size, ncores, sca
 
     tm.filtered <- get_gene_tile_matrix(scatac.object, scrna.object, window_size=window_size)
     cell.info <- cbind(scrna.object@meta.data, as.data.frame(scatac.object@cellColData))
-    cell.info <- cell.info[!duplicated(as.list(cell.info))]
+    # cell.info <- cell.info[!duplicated(as.list(cell.info))]]
+    cell.info <- cell.info[!duplicated(colnames(cell.info))]
     selected.genes <- unique(rowData(tm.filtered)$symbol)
 
     if(ncores > 1){

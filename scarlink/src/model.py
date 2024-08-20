@@ -19,7 +19,7 @@ from scipy.sparse import csr_matrix
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.model_selection import RepeatedKFold, train_test_split
 import tensorflow.keras.backend as K
-from scarlink.src.plotExtra import plotRegion, get_fragment_counts, plot_hist, create_colormap
+from scarlink.src.plotExtra import plotFeatures, plotRegion, get_fragment_counts, plot_hist, create_colormap
 from scarlink.src.read_h5_and_group_cells import construct_cell_info, construct_gex_mat, get_train_test_split, get_gene_tile_matrix_group_cells, write_significance, read_sparse_significance
 from scarlink.src.tile_significance import set_gene_tile_significance_bootstrapped, set_gene_tile_significance_signed_rank
 
@@ -745,8 +745,7 @@ class RegressionModel:
         end = int(f['genes/' + gene].attrs['end'])
         return chrm, start, end
     
-    def plot_gene(self, gene, groups = 'Clusters', plot_frags = False, to_save = False, plot_dir='', cmap = None, save_format='png', figsize=(17, 14), sort_gex=False, show_yticks=False, plot_shap=False, shap_cmap='Blues', cluster_order=[], bg_transparent=False):
-
+    def plot_gene(self, gene, groups = 'Clusters', features_to_plot = None, plot_frags = False, to_save = False, plot_file = '', plot_dir='', cmap = None, save_format='png', figsize=(17, 14), sort_gex=False, show_yticks=False, plot_shap=False, shap_cmap='Blues', cluster_order=[], bg_transparent=False):
         """Plot SCARlink output for given gene.
 
         Parameters
@@ -756,6 +755,8 @@ class RegressionModel:
         groups : str
             Cell grouping label. This should be present as a column name
             in the data frame cell_info found in coassay_matrix.h5.
+        features_to_plot : Dict of pandas dataframe
+            A dictionary of pandas dataframe containing chr, start, and end coordinates of features to plot.
         plot_frags : bool
             Not fully implemented. Whether to plot accessibility at base-pair
             resolution or at tile-level.
@@ -815,14 +816,21 @@ class RegressionModel:
         f.close()
 
         fig = plt.figure(figsize=figsize)
-        gs = gridspec.GridSpec(len(clusters) + 2, 2, width_ratios = [1, 0.3], height_ratios = [1] + [1 for i in range(len(clusters) + 1)])
+        num_features = 0 if features_to_plot is None else len(features_to_plot)
+        gs = gridspec.GridSpec(len(clusters) + 2 + num_features, 2, width_ratios = [1, 0.3], height_ratios = [1] + [0.5 for i in range(num_features)] + [1 for i in range(len(clusters) + 1)])
         plotrange = np.arange(start + tilesize//2, end + tilesize//2, tilesize).astype(int)
 
         axn = plt.subplot(gs[0, 0])
+        
+        axf = []
+        for i in range(num_features):
+            axf_i = plt.subplot(gs[i + 1, 0])
+            axf.append(axf_i)
+        
         ax = []
         for i in range(len(clusters)):
-            ax_a = plt.subplot(gs[i + 1, 0])
-            ax_r = plt.subplot(gs[i + 1, 1])
+            ax_a = plt.subplot(gs[i + 1 + num_features, 0])
+            ax_r = plt.subplot(gs[i + 1 + num_features, 1])
             ax.append([ax_a, ax_r])
         ax_c = plt.subplot(gs[-1, 0])
 
@@ -907,11 +915,15 @@ class RegressionModel:
             plotRegion(chrm, start, end, axn, self.gtf_file)
         else:
             axn.axis('off')
+        if num_features > 0:
+            for i,k,v in zip(range(num_features), features_to_plot.keys(), features_to_plot.values()):
+                plotFeatures(v, k, chrm, start, end, axf[i])
 
         # plt.suptitle(gene + "(corr : " + str(round(sp_corr, 4)) + ")", fontsize = 'xx-large')
         plt.suptitle(gene + "(" + r'$\rho$: ' + str(round(sp_corr, 4)) + ")", fontsize = 'xx-large')
         if to_save:
-            plt.savefig(plot_dir + gene + '.' + save_format, transparent=bg_transparent)
+            plot_fn = gene if plot_file == '' else plot_file
+            plt.savefig(plot_dir + plot_fn + '.' + save_format, transparent=bg_transparent)
             if self.log_file_name == '': print("Saved as " + plot_dir + gene + '.' + save_format) 
             else: logging.info("Saved as " + plot_dir + gene + '.' + save_format) 
         

@@ -11,6 +11,38 @@ import pandas
 import random
 plt.rcParams['text.usetex'] = False
 
+def plotFeatures(features_to_plot, feature_name, chrm, start, end, ax):
+    """Plot features.
+    
+    Parameters
+    ----------
+    features_to_plot : pandas dataframe
+    feature_name: str
+        Name of the feature.
+    chrm : str
+        Chromosome number.
+    start : int
+        Start coordinate.
+    end : int
+        End coordinate.
+    ax : axis
+        Axis to plot on.
+    """
+    features_p = features_to_plot[(features_to_plot["chr"] == chrm) & 
+                                  (features_to_plot["start"] <= end) & (features_to_plot["end"] >= start)]
+    
+    for i, r in features_p.iterrows():
+        ax.add_patch(patches.Rectangle((r['start'], 0.1), r['end'] - r['start'] + 1, 1.2, color = 'black'))
+    ax.set_xlim((start, end))
+    ax.set_ylim((-0.2, 1.3))
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_ylabel(feature_name, fontsize=10, rotation=0, ha = "right")
+    ax.spines['top'].set_visible(False) # new
+    ax.spines['right'].set_visible(False) # new
+    ax.spines['left'].set_visible(False) # new
+    ax.spines['bottom'].set_visible(False) # new
+
 def plotRegion(chrm, start, end, ax, gtf_file):
     """Plot gene annotations.
     

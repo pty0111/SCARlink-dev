@@ -26,7 +26,7 @@ def get_scarlink_output(dirname):
     scarlink_out['out_dir'] = out_dir
     return scarlink_out
 
-def plot_scarlink_output(scarlink_out, genes, celltype, plot_frags = False, to_save = True, cmap = None, save_format='png', figsize=(17, 14), sort_gex=True, show_yticks=False, shap_cmap='Blues', pvals_cmap='Blues', cluster_order=[], plot_shap=True, bg_transparent=False):
+def plot_scarlink_output(scarlink_out, genes, celltype, features_to_plot = None, plot_frags = False, to_save = True, plot_file = '', cmap = None, save_format='png', figsize=(17, 14), sort_gex=True, show_yticks=False, shap_cmap='Blues', pvals_cmap='Blues', cluster_order=[], plot_shap=True, bg_transparent=False):
     if isinstance(genes, str): genes = [genes]
     for gene in genes:
         coef_file = get_coef_file(scarlink_out['gene_list'], gene)
@@ -34,4 +34,4 @@ def plot_scarlink_output(scarlink_out, genes, celltype, plot_frags = False, to_s
 
         rm = read_model(scarlink_out['out_dir'], out_file_name=coef_file.split('/')[-1])
         rm.gtf_file = path + rm.gtf_file.split('/')[-1]
-        rm.plot_gene(gene, groups=celltype, plot_frags=plot_frags, to_save=to_save, plot_dir=scarlink_out['plot_dir'], cmap=cmap, save_format=save_format, figsize=figsize, sort_gex=sort_gex, show_yticks=show_yticks, plot_shap=plot_shap, shap_cmap=shap_cmap, cluster_order=cluster_order, bg_transparent=bg_transparent)
+        rm.plot_gene(rm, gene, groups=celltype, features_to_plot=features_to_plot, plot_frags=plot_frags, to_save=to_save, plot_file=plot_file, plot_dir=scarlink_out['plot_dir'], cmap=cmap, save_format=save_format, figsize=figsize, sort_gex=sort_gex, show_yticks=show_yticks, plot_shap=plot_shap, shap_cmap=shap_cmap, cluster_order=cluster_order, bg_transparent=bg_transparent)
