@@ -33,6 +33,8 @@ def plotFeatures(features_to_plot, feature_name, chrm, start, end, ax):
     
     for i, r in features_p.iterrows():
         ax.add_patch(patches.Rectangle((r['start'], 0.1), r['end'] - r['start'] + 1, 1.2, color = 'black'))
+        if len(r) > 3:
+            ax.text(r['start']-500, 1.5, '$\it{'+r[3]+'}$')
     ax.set_xlim((start, end))
     ax.set_ylim((-0.2, 1.3))
     ax.set_xticks([])
@@ -42,6 +44,7 @@ def plotFeatures(features_to_plot, feature_name, chrm, start, end, ax):
     ax.spines['right'].set_visible(False) # new
     ax.spines['left'].set_visible(False) # new
     ax.spines['bottom'].set_visible(False) # new
+
 
 def plotRegion(chrm, start, end, ax, gtf_file):
     """Plot gene annotations.
