@@ -11,12 +11,12 @@ import pandas
 import random
 plt.rcParams['text.usetex'] = False
 
-def plotFeatures(features_to_plot, feature_name, chrm, start, end, ax):
+def plotFeatures(features_to_plot, feature_name, chrm, start, end, ax, feature_color = "black"):
     """Plot features.
     
     Parameters
     ----------
-    features_to_plot : pandas dataframe
+    features_to_plot : pandas dataframe (0: chrm, 1: start, 2: end, 3: name)
     feature_name: str
         Name of the feature.
     chrm : str
@@ -28,13 +28,13 @@ def plotFeatures(features_to_plot, feature_name, chrm, start, end, ax):
     ax : axis
         Axis to plot on.
     """
-    features_p = features_to_plot[(features_to_plot["chr"] == chrm) & 
-                                  (features_to_plot["start"] <= end) & (features_to_plot["end"] >= start)]
+    features_p = features_to_plot[(features_to_plot[0] == chrm) & 
+                                  (features_to_plot[1] <= end) & (features_to_plot[2] >= start)]
     
     for i, r in features_p.iterrows():
-        ax.add_patch(patches.Rectangle((r['start'], 0.1), r['end'] - r['start'] + 1, 1.2, color = 'black'))
+        ax.add_patch(patches.Rectangle((r[1], 0.1), r[2] - r[1] + 1, 1.2, color = feature_color))
         if len(r) > 3:
-            ax.text(r['start']-500, 1.5, '$\it{'+r[3]+'}$')
+            ax.text(r[1]-500, 1.5, '$\it{'+r[3]+'}$')
     ax.set_xlim((start, end))
     ax.set_ylim((-0.2, 1.3))
     ax.set_xticks([])
@@ -44,7 +44,6 @@ def plotFeatures(features_to_plot, feature_name, chrm, start, end, ax):
     ax.spines['right'].set_visible(False) # new
     ax.spines['left'].set_visible(False) # new
     ax.spines['bottom'].set_visible(False) # new
-
 
 def plotRegion(chrm, start, end, ax, gtf_file):
     """Plot gene annotations.
